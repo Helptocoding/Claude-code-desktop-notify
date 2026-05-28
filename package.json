@@ -1,0 +1,40 @@
+{
+  "name": "claude-code-desktop-notify",
+  "version": "1.0.4",
+  "description": "Desktop notifications for Claude Code — get alerted when permissions are needed or Claude is waiting",
+  "type": "module",
+  "bin": {
+    "claude-code-desktop-notify": "./bin/claude-code-desktop-notify.js"
+  },
+  "scripts": {
+    "postinstall": "node scripts/setup.js",
+    "preuninstall": "node scripts/uninstall.js"
+  },
+  "keywords": [
+    "claude-code",
+    "claude",
+    "notifications",
+    "desktop-notifications",
+    "hooks",
+    "productivity"
+  ],
+  "author": "Felipe Dorantes Díaz <fdiaa.16@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/felipeddiaz/Claude-code-desktop-notify.git"
+  },
+  "bugs": "https://github.com/felipeddiaz/Claude-code-desktop-notify/issues",
+  "homepage": "https://github.com/felipeddiaz/Claude-code-desktop-notify#readme",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "preferGlobal": true,
+  "files": [
+    "bin/",
+    "scripts/",
+    "hooks/",
+    "README.md",
+    "LICENSE"
+  ]
+}
