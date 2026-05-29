@@ -25,7 +25,7 @@ El `postinstall` configura todo automáticamente: detecta tu OS, copia el script
 
 ## Compatibilidad
 
-| OS | Método |
+| OS | Metodo |
 |----|--------|
 | **Windows** | PowerShell toast nativo (sin dependencias externas) |
 | **macOS** | `osascript` (nativo) |
@@ -82,11 +82,28 @@ El hook recibe un JSON por stdin con el tipo de evento y el mensaje, y lo convie
 
 ### Windows: las notificaciones no aparecen
 
-Verifica que las notificaciones estén habilitadas en **Configuración → Sistema → Notificaciones** y que **Claude Code Notifications** tenga permiso.
+Verifica que las notificaciones esten habilitadas en **Configuración → Sistema → Notificaciones** y que **Claude Code Notifications** tenga permiso.
 
-### Windows: sin sonido
+### Windows: personalizar el sonido
 
-Activa **Permitir que las notificaciones reproduzcan sonidos** en la misma pantalla. El paquete también reproduce un sonido del sistema (doble tono en permisos, tono simple al esperar respuesta).
+Por defecto usa sonidos suaves de `C:\Windows\Media` (nudge al pedir permiso, chimes al esperar respuesta).
+
+Crea `~/.claude/desktop-notify-sounds.json` con rutas completas o alias:
+
+```json
+{
+  "permission_prompt": "nudge",
+  "idle_prompt": "chimes",
+  "auth_success": "ding",
+  "default": "notify"
+}
+```
+
+**Alias disponibles:** `chimes`, `ding`, `notify`, `nudge`, `messaging`, `email`, `balloon`, `default`, `generic`, `exclamation`, `error`, `calendar`
+
+Tambien puedes poner el nombre de cualquier `.wav` de `C:\Windows\Media` o la ruta completa a tu propio archivo, por ejemplo `"C:\\Users\\TU\\Music\\alerta.wav"`.
+
+Tras cambiar el JSON, prueba con `claude-code-desktop-notify test`.
 
 ### macOS: sin sonido o sin notificación
 

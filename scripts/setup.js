@@ -127,7 +127,7 @@ function setup() {
   ok(`${c.bold}¡Listo! Las notificaciones están activas.${c.reset}`);
   info(`Recibirás una alerta cuando Claude necesite:`);
   console.log(`  ${c.dim}•${c.reset} Autorizar una acción (permission_prompt)`);
-  console.log(`  ${c.dim}•${c.reset} Tu respuesta después de 60s de espera (idle_prompt)`);
+  console.log(`  ${c.dim}•${c.reset} Tu respuesta despues de 60s de espera (idle_prompt)`);
   console.log('');
   info(`Para probar: ${c.cyan}${PKG} test${c.reset}`);
   info(`Para desinstalar: ${c.cyan}npm remove -g ${PKG}${c.reset}`);

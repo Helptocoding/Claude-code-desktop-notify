@@ -43,7 +43,7 @@ MESSAGE=${MESSAGE:-"Claude necesita tu atención"}
 PROJECT=$(basename "$CWD" 2>/dev/null || echo "")
 
 case "$NOTIF_TYPE" in
-    permission_prompt) TITLE="🔐 Claude Code — Autorización requerida"; SOUND="Ping"    ;;
+    permission_prompt) TITLE="🔐 Claude Code — Autorizacion requerida"; SOUND="Ping"    ;;
     idle_prompt)       TITLE="⏳ Claude Code — Esperando respuesta";      SOUND="Tink"    ;;
     auth_success)      TITLE="✅ Claude Code — Autenticado";               SOUND="Glass"   ;;
     *)                 TITLE="Claude Code";                                SOUND="Default" ;;

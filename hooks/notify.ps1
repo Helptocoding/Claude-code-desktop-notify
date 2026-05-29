@@ -36,49 +36,98 @@ function Register-ToastApp {
     }
 }
 
+function Get-SoundConfig {
+    $path = Join-Path $env:USERPROFILE '.claude\desktop-notify-sounds.json'
+    if (-not (Test-Path $path)) { return $null }
+    try {
+        return Get-Content $path -Raw | ConvertFrom-Json
+    } catch {
+        return $null
+    }
+}
+
+function Resolve-SoundFile {
+    param([string]$Spec)
+
+    if ([string]::IsNullOrWhiteSpace($Spec)) { return $null }
+
+  $aliases = @{
+    chimes     = 'chimes.wav'
+    ding       = 'ding.wav'
+    notify     = 'notify.wav'
+    nudge      = 'Windows Message Nudge.wav'
+    messaging  = 'Windows Notify Messaging.wav'
+    email      = 'Windows Notify Email.wav'
+    balloon    = 'Windows Balloon.wav'
+    default    = 'Windows Notify System Generic.wav'
+    generic    = 'Windows Notify.wav'
+    exclamation = 'Windows Exclamation.wav'
+    error      = 'Windows Error.wav'
+    calendar   = 'Windows Notify Calendar.wav'
+  }
+
+    if ($aliases.ContainsKey($Spec.ToLower())) {
+        $Spec = $aliases[$Spec.ToLower()]
+    }
+
+    if (Test-Path -LiteralPath $Spec) { return (Resolve-Path -LiteralPath $Spec).Path }
+
+    $mediaFile = Join-Path $env:WINDIR "Media\$Spec"
+    if (Test-Path -LiteralPath $mediaFile) { return $mediaFile }
+
+    return $null
+}
+
+function Get-DefaultSoundSpec {
+    param([string]$NotifType)
+
+    switch ($NotifType) {
+        'permission_prompt' { return 'nudge' }
+        'idle_prompt'       { return 'chimes' }
+        'auth_success'      { return 'ding' }
+        default             { return 'notify' }
+    }
+}
+
 function Play-NotificationSound {
     param([string]$NotifType)
 
-  $played = $false
-  try {
-    if (-not ('NativeSound' -as [type])) {
-      Add-Type @'
+    $config = Get-SoundConfig
+    $spec = $null
+    if ($config) {
+        $spec = $config.$NotifType
+        if (-not $spec) { $spec = $config.default }
+    }
+    if (-not $spec) { $spec = Get-DefaultSoundSpec -NotifType $NotifType }
+
+    $wavPath = Resolve-SoundFile -Spec $spec
+    if (-not $wavPath) { return }
+
+    # PlaySound vive en winmm.dll (no user32). SYNC evita que el proceso termine antes de oír el audio.
+    try {
+        if (-not ('WinMmSound' -as [type])) {
+            Add-Type @'
 using System;
 using System.Runtime.InteropServices;
-public static class NativeSound {
-  [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+public static class WinMmSound {
+  [DllImport("winmm.dll", SetLastError = true, CharSet = CharSet.Auto)]
   public static extern bool PlaySound(string pszSound, IntPtr hmod, uint fdwFlag);
 }
 '@ | Out-Null
-    }
+        }
 
-    $asyncAlias = [uint32]0x00010001  # SND_ASYNC | SND_ALIAS
-    switch ($NotifType) {
-      'permission_prompt' {
-        [void][NativeSound]::PlaySound('SystemExclamation', [IntPtr]::Zero, $asyncAlias)
-        Start-Sleep -Milliseconds 200
-        [void][NativeSound]::PlaySound('SystemHand', [IntPtr]::Zero, $asyncAlias)
-      }
-      'idle_prompt'       { [void][NativeSound]::PlaySound('SystemAsterisk', [IntPtr]::Zero, $asyncAlias) }
-      'auth_success'      { [void][NativeSound]::PlaySound('SystemDefault', [IntPtr]::Zero, $asyncAlias) }
-      default             { [void][NativeSound]::PlaySound('SystemDefault', [IntPtr]::Zero, $asyncAlias) }
-    }
-    $played = $true
-  } catch {}
+        $flags = [uint32]0x00020000  # SND_FILENAME | SND_SYNC
+        if ([WinMmSound]::PlaySound($wavPath, [IntPtr]::Zero, $flags)) { return }
+    } catch {}
 
-  if ($played) { return }
-
-  try {
-    switch ($NotifType) {
-      'permission_prompt' {
-        [void][Console]::Beep(880, 180)
-        Start-Sleep -Milliseconds 90
-        [void][Console]::Beep(1100, 220)
-      }
-      'idle_prompt'       { [void][Console]::Beep(740, 200) }
-      default             { [void][Console]::Beep(600, 150) }
+    try {
+        $player = New-Object System.Media.SoundPlayer $wavPath
+        $player.PlaySync()
+    } catch {
+        try {
+            [void][Console]::Beep(740, 200)
+        } catch {}
     }
-  } catch {}
 }
 
 function Show-WinRTToast {
@@ -106,7 +155,7 @@ function Show-WinRTToast {
       <text>$safeMessage</text>
     </binding>
   </visual>
-  <audio src="$Sound" silent="false" loop="false"/>
+  <audio silent="true"/>
 </toast>
 "@
 
@@ -173,7 +222,7 @@ if ($message.Length -gt 120) { $message = $message.Substring(0, 117) + '...' }
 
 switch ($notifType) {
     'permission_prompt' {
-        $title = 'Claude Code - Autorización requerida'
+        $title = 'Claude Code - Autorizacion requerida'
         $sound = 'ms-winsoundevent:Notification.SMS'
     }
     'idle_prompt' {
