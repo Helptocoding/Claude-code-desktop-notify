@@ -70,6 +70,8 @@ function uninstall() {
   const scripts = [
     `${PKG}.ps1`,
     `${PKG}.sh`,
+    `${PKG}-reset-title.ps1`,
+    `${PKG}-reset-title.sh`,
     'claude-notify.ps1',
     'claude-notify.sh',
   ];
@@ -82,6 +84,29 @@ function uninstall() {
       // No existía, ignorar
     }
   }
+
+  // Limpiar hook Stop
+  try {
+    const raw = fs.readFileSync(SETTINGS_PATH, 'utf8');
+    const settings = JSON.parse(raw);
+    if (settings.hooks?.Stop) {
+      settings.hooks.Stop = settings.hooks.Stop
+        .map(entry => {
+          if (!entry.hooks) return entry;
+          const filtered = entry.hooks.filter(h => !isOurHook(h.command));
+          return filtered.length > 0 ? { ...entry, hooks: filtered } : null;
+        })
+        .filter(Boolean);
+      if (settings.hooks.Stop.length === 0) delete settings.hooks.Stop;
+      if (Object.keys(settings.hooks).length === 0) delete settings.hooks;
+      fs.writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2), 'utf8');
+      ok('Hook Stop removido de settings.json');
+    }
+  } catch {}
+
+  // Limpiar archivo de contador
+  const countFile = path.join(os.homedir(), '.claude', '.notify-count');
+  try { fs.unlinkSync(countFile); ok('Contador de título eliminado'); } catch {}
 
   uninstallStatusline({ ok, warn });
 

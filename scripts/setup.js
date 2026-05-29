@@ -123,7 +123,7 @@ function setup() {
   }
 
   // ── Patchear settings.json ──
-  patchSettings(hookCommand);
+  patchSettings(hookCommand, env, PKG_ROOT);
 
   installStatusline(PKG_ROOT, env, { ok, info, warn });
   setActiveFlag(true);
@@ -131,7 +131,7 @@ function setup() {
   printInstallBanner(c);
 }
 
-function patchSettings(hookCommand) {
+function patchSettings(hookCommand, env, pkgRoot) {
   // Leer settings existentes
   let settings = {};
   try {
@@ -146,7 +146,31 @@ function patchSettings(hookCommand) {
   settings.hooks ??= {};
   settings.hooks.Notification ??= [];
 
-  // Actualizar comando si ya estaba instalado (p. ej. migrar cmd /c → powershell.exe)
+  // ── Comando de reset de título (hook Stop) ──
+  let resetCommand;
+  if (env === 'windows') {
+    const src  = path.join(pkgRoot, 'hooks', 'reset-title.ps1');
+    const dest = path.join(HOOKS_DIR, `${PKG}-reset-title.ps1`);
+    fs.copyFileSync(src, dest);
+    resetCommand = `powershell.exe -NoProfile -ExecutionPolicy Bypass -File "${dest}"`;
+  } else if (env === 'wsl') {
+    const src  = path.join(pkgRoot, 'hooks', 'reset-title.sh');
+    const dest = path.join(HOOKS_DIR, `${PKG}-reset-title.sh`);
+    fs.copyFileSync(src, dest);
+    fs.chmodSync(dest, '755');
+    const winDest = (() => {
+      try { return execSync(`wslpath -w "${dest}"`, { encoding: 'utf8' }).trim(); } catch { return dest; }
+    })();
+    resetCommand = `wsl.exe bash "${winDest}"`;
+  } else {
+    const src  = path.join(pkgRoot, 'hooks', 'reset-title.sh');
+    const dest = path.join(HOOKS_DIR, `${PKG}-reset-title.sh`);
+    fs.copyFileSync(src, dest);
+    fs.chmodSync(dest, '755');
+    resetCommand = dest;
+  }
+
+  // Actualizar comando de notificación si ya estaba instalado
   let updated = false;
   for (const entry of settings.hooks.Notification) {
     for (const hook of entry.hooks ?? []) {
@@ -161,29 +185,48 @@ function patchSettings(hookCommand) {
   if (updated) {
     fs.writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2), 'utf8');
     ok(`Comando del hook actualizado en settings.json`);
-    return;
+    // Aún así registrar el hook Stop si no existe
   }
 
   const alreadyInstalled = settings.hooks.Notification
     .flatMap(entry => entry.hooks ?? [])
     .some(h => typeof h.command === 'string' && (h.command.includes(PKG) || h.command.includes('claude-notify')));
 
-  if (alreadyInstalled) {
+  if (!alreadyInstalled) {
+    settings.hooks.Notification.push({
+      matcher: "permission_prompt|idle_prompt",
+      hooks: [
+        {
+          type: "command",
+          command: hookCommand,
+          timeout: 5
+        }
+      ]
+    });
+    ok(`Hook de notificación agregado a settings.json`);
+  } else if (!updated) {
     ok(`${PKG} ya estaba en settings.json — sin cambios.`);
-    return;
   }
 
-  // Agregar la entrada
-  settings.hooks.Notification.push({
-    matcher: "permission_prompt|idle_prompt",
-    hooks: [
-      {
-        type: "command",
-        command: hookCommand,
-        timeout: 5
-      }
-    ]
-  });
+  // ── Registrar hook Stop para resetear el título ──
+  settings.hooks.Stop ??= [];
+  const stopAlreadyInstalled = settings.hooks.Stop
+    .flatMap(entry => entry.hooks ?? [])
+    .some(h => typeof h.command === 'string' && h.command.includes(`${PKG}-reset-title`));
+
+  if (!stopAlreadyInstalled) {
+    settings.hooks.Stop.push({
+      matcher: "",
+      hooks: [
+        {
+          type: "command",
+          command: resetCommand,
+          timeout: 3
+        }
+      ]
+    });
+    ok(`Hook Stop (reset de título) agregado a settings.json`);
+  }
 
   fs.writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2), 'utf8');
   ok(`settings.json actualizado`);

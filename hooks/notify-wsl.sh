@@ -53,4 +53,19 @@ echo "$INPUT" | "$POWERSHELL" \
     -NoProfile \
     -File "$WIN_PATH" 2>/dev/null || true
 
+# ─── Título de ventana con contador (afecta Windows Terminal) ─────────────────
+COUNT_FILE="$HOME/.claude/.notify-count"
+COUNT=0
+if [ -f "$COUNT_FILE" ]; then
+    VAL=$(cat "$COUNT_FILE" 2>/dev/null | tr -d '[:space:]')
+    [[ "$VAL" =~ ^[0-9]+$ ]] && COUNT=$VAL
+fi
+COUNT=$((COUNT + 1))
+printf '%s' "$COUNT" > "$COUNT_FILE"
+
+NOTIF_TYPE=$(echo "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('notification_type',''))" 2>/dev/null || echo "")
+ICON="⏳"
+[[ "$NOTIF_TYPE" == "permission_prompt" ]] && ICON="🔐"
+printf '\033]0;%s %d | Claude Code\007' "$ICON" "$COUNT"
+
 exit 0

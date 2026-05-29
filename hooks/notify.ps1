@@ -189,6 +189,26 @@ function Show-FallbackToast {
     $notify.Dispose()
 }
 
+# ─── Título de ventana con contador ──────────────────────────────────────────
+function Update-TerminalTitle {
+    param([string]$NotifType)
+    try {
+        $countFile = Join-Path $env:USERPROFILE '.claude\.notify-count'
+        $count = 0
+        if (Test-Path -LiteralPath $countFile) {
+            $val = (Get-Content -LiteralPath $countFile -Raw -ErrorAction SilentlyContinue).Trim()
+            if ($val -match '^\d+$') { $count = [int]$val }
+        }
+        $count++
+        Set-Content -LiteralPath $countFile -Value "$count" -NoNewline -ErrorAction SilentlyContinue
+
+        $icon = if ($NotifType -eq 'permission_prompt') { '🔐' } else { '⏳' }
+        $newTitle = "$icon $count | Claude Code"
+        # Secuencia de escape OSC 0 para cambiar título de ventana
+        [Console]::Write("`e]0;$newTitle`a")
+    } catch {}
+}
+
 # ─── Leer stdin ───────────────────────────────────────────────────────────────
 $rawInput = $null
 try {
@@ -242,6 +262,7 @@ switch ($notifType) {
 $subtitle = if ($cwd) { "Proyecto: $cwd" } else { '' }
 
 Register-ToastApp
+Update-TerminalTitle -NotifType $notifType
 
 try {
     Show-WinRTToast -Title $title -Message $message -Subtitle $subtitle -Sound $sound

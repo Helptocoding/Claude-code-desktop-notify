@@ -51,6 +51,23 @@ esac
 
 SUBTITLE=${PROJECT:+"Proyecto: $PROJECT"}
 
+# ─── Título de ventana con contador ──────────────────────────────────────────
+COUNT_FILE="$HOME/.claude/.notify-count"
+COUNT=0
+if [ -f "$COUNT_FILE" ]; then
+    VAL=$(cat "$COUNT_FILE" 2>/dev/null | tr -d '[:space:]')
+    [[ "$VAL" =~ ^[0-9]+$ ]] && COUNT=$VAL
+fi
+COUNT=$((COUNT + 1))
+printf '%s' "$COUNT" > "$COUNT_FILE"
+
+case "$NOTIF_TYPE" in
+    permission_prompt) ICON="🔐" ;;
+    *)                 ICON="⏳" ;;
+esac
+# OSC 0: cambia título de ventana del terminal
+printf '\033]0;%s %d | Claude Code\007' "$ICON" "$COUNT"
+
 if [[ "$(uname)" == "Darwin" ]]; then
     SAFE_TITLE="${TITLE//\"/\\\"}"
     SAFE_MSG="${MESSAGE//\"/\\\"}"
