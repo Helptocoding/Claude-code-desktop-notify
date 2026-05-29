@@ -7,8 +7,8 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-
-const PKG = 'claude-code-desktop-notify';
+import { PKG } from './lib/constants.js';
+import { uninstallStatusline } from './statusline.js';
 
 const c = {
   reset: '\x1b[0m',
@@ -82,6 +82,8 @@ function uninstall() {
       // No existía, ignorar
     }
   }
+
+  uninstallStatusline({ ok, warn });
 
   console.log('');
   ok(`${PKG} desinstalado correctamente.`);

@@ -52,6 +52,14 @@ claude-code-desktop-notify setup
 npm remove -g claude-code-desktop-notify
 ```
 
+## Indicador [NOTIFY] en Claude Code
+
+Al instalar, aparece un badge **cyan** `[NOTIFY]` en la barra inferior de Claude Code.
+
+- Si ya tienes otra status line configurada, se **encadena** automáticamente sin reemplazarla.
+- `claude-code-desktop-notify off` oculta el badge y las alertas; `on` lo restaura.
+- Tras instalar o actualizar, **reinicia Claude Code** para ver el cambio.
+
 ## Cómo funciona
 
 Claude Code tiene un sistema de hooks nativo. Este paquete registra un hook `Notification` en `~/.claude/settings.json` que ejecuta un script local cada vez que Claude necesita atención.

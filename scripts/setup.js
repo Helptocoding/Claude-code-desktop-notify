@@ -10,10 +10,12 @@ import path from 'path';
 import os from 'os';
 import { fileURLToPath } from 'url';
 import { execSync } from 'child_process';
+import { PKG } from './lib/constants.js';
+import { printInstallBanner } from './lib/banner.js';
+import { installStatusline, setActiveFlag } from './statusline.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PKG_ROOT  = path.resolve(__dirname, '..');
-const PKG       = 'claude-code-desktop-notify';
 
 // ─── Colores para la consola ────────────────────────────────────────────────
 const c = {
@@ -123,15 +125,10 @@ function setup() {
   // ── Patchear settings.json ──
   patchSettings(hookCommand);
 
-  console.log('');
-  ok(`${c.bold}¡Listo! Las notificaciones están activas.${c.reset}`);
-  info(`Recibirás una alerta cuando Claude necesite:`);
-  console.log(`  ${c.dim}•${c.reset} Autorizar una acción (permission_prompt)`);
-  console.log(`  ${c.dim}•${c.reset} Tu respuesta despues de 60s de espera (idle_prompt)`);
-  console.log('');
-  info(`Para probar: ${c.cyan}${PKG} test${c.reset}`);
-  info(`Para desinstalar: ${c.cyan}npm remove -g ${PKG}${c.reset}`);
-  console.log('');
+  installStatusline(PKG_ROOT, env, { ok, info, warn });
+  setActiveFlag(true);
+
+  printInstallBanner(c);
 }
 
 function patchSettings(hookCommand) {

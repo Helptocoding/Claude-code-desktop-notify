@@ -11,6 +11,13 @@ import { fileURLToPath } from 'url';
 
 const PKG = 'claude-code-desktop-notify';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const ACTIVE_FLAG = path.join(HOME, '.claude', `.${PKG}-active`);
+
+function setActiveFlag(active) {
+  fs.mkdirSync(path.dirname(ACTIVE_FLAG), { recursive: true });
+  if (active) fs.writeFileSync(ACTIVE_FLAG, 'on\n', 'utf8');
+  else { try { fs.unlinkSync(ACTIVE_FLAG); } catch {} }
+}
 
 const c = {
   reset:  '\x1b[0m',
@@ -117,7 +124,9 @@ function toggleNotifications(enable) {
     } else {
       delete entry.disabled;
       writeSettings(settings);
+      setActiveFlag(true);
       ok(`${c.bold}Notificaciones activadas.${c.reset}`);
+      info(`Badge ${c.cyan}[NOTIFY]${c.reset} visible de nuevo en Claude Code`);
       info(`Prueba con: ${c.cyan}${PKG} test${c.reset}`);
     }
   } else {
@@ -126,8 +135,9 @@ function toggleNotifications(enable) {
     } else {
       entry.disabled = true;
       writeSettings(settings);
+      setActiveFlag(false);
       ok(`${c.bold}Notificaciones desactivadas.${c.reset}`);
-      info(`Para reactivar: ${c.cyan}${PKG} on${c.reset}`);
+      info(`Badge ${c.cyan}[NOTIFY]${c.reset} oculto hasta que ejecutes ${c.cyan}${PKG} on${c.reset}`);
     }
   }
   console.log('');
