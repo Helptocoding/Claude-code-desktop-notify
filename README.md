@@ -1,10 +1,27 @@
+<div align="center">
+
+<img src="https://raw.githubusercontent.com/Helptocoding/Claude-code-desktop-notify/main/assets/logo.png" alt="claude-code-desktop-notify logo" width="160" />
+
 # claude-code-desktop-notify
 
-Notificaciones de escritorio para **Claude Code** — te avisa cuando necesita que autorices algo o está esperando tu respuesta.
+**Notificaciones de escritorio para Claude Code**
 
-> **Herramienta no oficial.** No está afiliada ni respaldada por Anthropic.
+Deja de mirar la terminal. Recibe una alerta cuando Claude necesita tu atención.
 
-Deja de mirar la terminal. Trabaja en lo tuyo y recibe una alerta cuando Claude realmente te necesite.
+> Herramienta no oficial — no afiliada ni respaldada por Anthropic.
+
+---
+
+[Instalación](#instalación) • [Comandos](#comandos) • [Compatibilidad](#compatibilidad) • [Cómo funciona](#cómo-funciona) • [Solución de problemas](#solución-de-problemas)
+
+![version](https://img.shields.io/npm/v/claude-code-desktop-notify?label=version&color=0e7fc0)
+![license](https://img.shields.io/npm/l/claude-code-desktop-notify?label=license&color=22863a)
+![node](https://img.shields.io/node/v/claude-code-desktop-notify?label=node&color=3d7a3d)
+![platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux%20%7C%20WSL-blueviolet)
+
+</div>
+
+---
 
 ## Instalación
 
@@ -16,21 +33,7 @@ pnpm add -g claude-code-desktop-notify
 
 El `postinstall` configura todo automáticamente: detecta tu OS, copia el script correcto y actualiza `~/.claude/settings.json`.
 
-## Eventos cubiertos
-
-| Evento | Cuándo dispara |
-|--------|---------------|
-| `permission_prompt` | Claude necesita que autorices una acción (escribir archivo, ejecutar comando, etc.) |
-| `idle_prompt` | Claude lleva 60+ segundos esperando tu respuesta |
-
-## Compatibilidad
-
-| OS | Metodo |
-|----|--------|
-| **Windows** | PowerShell toast nativo (sin dependencias externas) |
-| **macOS** | `osascript` (nativo) |
-| **Linux** | `notify-send` (libnotify) |
-| **WSL** | Llama a `powershell.exe` de Windows desde bash |
+---
 
 ## Comandos
 
@@ -52,13 +55,44 @@ claude-code-desktop-notify setup
 npm remove -g claude-code-desktop-notify
 ```
 
-## Indicador [NOTIFY] en Claude Code
+---
 
-Al instalar, aparece un badge **cyan** `[NOTIFY]` en la barra inferior de Claude Code.
+## Eventos cubiertos
+
+| Evento | Cuándo dispara |
+|--------|---------------|
+| `permission_prompt` | Claude necesita que autorices una acción (escribir archivo, ejecutar comando, etc.) |
+| `idle_prompt` | Claude lleva 60+ segundos esperando tu respuesta |
+
+---
+
+## Compatibilidad
+
+| OS | Método |
+|----|--------|
+| **Windows** | PowerShell toast nativo (sin dependencias externas) |
+| **macOS** | `osascript` (nativo) |
+| **Linux** | `notify-send` (libnotify) |
+| **WSL** | Llama a `powershell.exe` de Windows desde bash |
+
+---
+
+## Indicador en la terminal
+
+Al recibir una notificación, el **título de la ventana del terminal** cambia automáticamente:
+
+- `🔐 1 | Claude Code` — cuando Claude necesita autorización
+- `⏳ 1 | Claude Code` — cuando Claude está esperando tu respuesta
+
+El número sube con cada evento pendiente y se resetea cuando Claude termina la tarea. Visible en la barra de tareas de Windows Terminal.
+
+Además, aparece un badge **cyan** `[NOTIFY]` en la barra inferior de Claude Code.
 
 - Si ya tienes otra status line configurada, se **encadena** automáticamente sin reemplazarla.
 - `claude-code-desktop-notify off` oculta el badge y las alertas; `on` lo restaura.
 - Tras instalar o actualizar, **reinicia Claude Code** para ver el cambio.
+
+---
 
 ## Cómo funciona
 
@@ -67,7 +101,6 @@ Claude Code tiene un sistema de hooks nativo. Este paquete registra un hook `Not
 El hook recibe un JSON por stdin con el tipo de evento y el mensaje, y lo convierte en una notificación nativa del sistema operativo.
 
 ```json
-// Lo que agrega a ~/.claude/settings.json
 {
   "hooks": {
     "Notification": [
@@ -86,11 +119,13 @@ El hook recibe un JSON por stdin con el tipo de evento y el mensaje, y lo convie
 }
 ```
 
+---
+
 ## Solución de problemas
 
 ### Windows: las notificaciones no aparecen
 
-Verifica que las notificaciones esten habilitadas en **Configuración → Sistema → Notificaciones** y que **Claude Code Notifications** tenga permiso.
+Verifica que las notificaciones estén habilitadas en **Configuración → Sistema → Notificaciones** y que **Claude Code Notifications** tenga permiso.
 
 ### Windows: personalizar el sonido
 
@@ -109,7 +144,7 @@ Crea `~/.claude/desktop-notify-sounds.json` con rutas completas o alias:
 
 **Alias disponibles:** `chimes`, `ding`, `notify`, `nudge`, `messaging`, `email`, `balloon`, `default`, `generic`, `exclamation`, `error`, `calendar`
 
-Tambien puedes poner el nombre de cualquier `.wav` de `C:\Windows\Media` o la ruta completa a tu propio archivo, por ejemplo `"C:\\Users\\TU\\Music\\alerta.wav"`.
+También puedes poner el nombre de cualquier `.wav` de `C:\Windows\Media` o la ruta completa a tu propio archivo.
 
 Tras cambiar el JSON, prueba con `claude-code-desktop-notify test`.
 
@@ -119,13 +154,13 @@ Tras cambiar el JSON, prueba con `claude-code-desktop-notify test`.
 
 ### WSL: no encuentra `powershell.exe`
 
-Asegúrate de tener acceso a Windows desde WSL. Prueba:
 ```bash
 which powershell.exe
 # Debe retornar algo como /mnt/c/Windows/System32/...
 ```
 
 Si usas Git Bash o MSYS2, agrega PowerShell al PATH:
+
 ```bash
 export PATH="/c/Windows/System32/WindowsPowerShell/v1.0:$PATH"
 ```
@@ -133,15 +168,20 @@ export PATH="/c/Windows/System32/WindowsPowerShell/v1.0:$PATH"
 ### Verificar que el hook funciona
 
 ```bash
-# Simular el evento manualmente
+# macOS / Linux
 echo '{"notification_type":"permission_prompt","message":"Prueba manual","cwd":"/mi/proyecto"}' | ~/.claude/hooks/claude-code-desktop-notify.sh
-# o en Windows:
+
+# Windows
 echo '{"notification_type":"permission_prompt","message":"Prueba manual","cwd":"C:\\proyecto"}' | powershell -File %USERPROFILE%\.claude\hooks\claude-code-desktop-notify.ps1
 ```
 
+---
+
 ## Limitación conocida
 
-El evento `AskUserQuestion` (cuando Claude hace una pregunta interactiva) actualmente **no dispara** el hook `Notification` — es una limitación de Claude Code que tiene un [feature request abierto](https://github.com/anthropics/claude-code/issues/13830). Los hooks de `permission_prompt` e `idle_prompt` cubren los casos más comunes.
+El evento `AskUserQuestion` actualmente **no dispara** el hook `Notification` — es una limitación de Claude Code con un [feature request abierto](https://github.com/anthropics/claude-code/issues/13830). Los hooks de `permission_prompt` e `idle_prompt` cubren los casos más comunes.
+
+---
 
 ## Licencia
 
