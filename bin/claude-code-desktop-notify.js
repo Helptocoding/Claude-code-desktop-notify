@@ -16,6 +16,27 @@ const HOOKS_DIR     = path.join(HOME, '.claude', 'hooks');
 const SETTINGS_PATH = path.join(HOME, '.claude', 'settings.json');
 const ACTIVE_FLAG   = path.join(HOME, '.claude', `.${PKG}-active`);
 
+const c = {
+  reset:  '\x1b[0m',
+  green:  '\x1b[32m',
+  yellow: '\x1b[33m',
+  cyan:   '\x1b[36m',
+  red:    '\x1b[31m',
+  bold:   '\x1b[1m',
+  dim:    '\x1b[2m',
+};
+
+const ok   = (msg) => console.log(`${c.green}✔${c.reset} ${msg}`);
+const warn = (msg) => console.log(`${c.yellow}⚠${c.reset} ${msg}`);
+const fail = (msg) => console.log(`${c.red}✖${c.reset} ${msg}`);
+const info = (msg) => console.log(`${c.cyan}ℹ${c.reset} ${msg}`);
+
+function setActiveFlag(active) {
+  fs.mkdirSync(path.dirname(ACTIVE_FLAG), { recursive: true });
+  if (active) fs.writeFileSync(ACTIVE_FLAG, 'on\n', 'utf8');
+  else { try { fs.unlinkSync(ACTIVE_FLAG); } catch {} }
+}
+
 function isOurHook(command) {
   if (typeof command !== 'string') return false;
   return command.includes(PKG) || command.includes('claude-notify');
@@ -150,7 +171,7 @@ function sendTestNotification() {
     const testCommand = process.platform === 'win32'
       ? resolveWindowsTestCommand(notifyHook.command)
       : notifyHook.command;
-    execSync(testCommand, { input: testPayload, stdio: ['pipe', 'inherit', 'inherit'] });
+    execSync(testCommand, { input: testPayload, stdio: ['pipe', 'inherit', 'inherit'], timeout: 8000 });
 
     ok('Notificación enviada. ¿La viste en el escritorio?');
     console.log(`  ${c.dim}Si no apareció, revisa los permisos de notificaciones de tu OS.${c.reset}\n`);

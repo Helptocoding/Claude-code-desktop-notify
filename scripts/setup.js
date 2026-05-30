@@ -183,9 +183,8 @@ function patchSettings(hookCommand, env, pkgRoot) {
     }
   }
   if (updated) {
-    fs.writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2), 'utf8');
     ok(`Comando del hook actualizado en settings.json`);
-    // Aún así registrar el hook Stop si no existe
+    // Aún así continuar para registrar el hook Stop si no existe
   }
 
   const alreadyInstalled = settings.hooks.Notification
@@ -216,7 +215,6 @@ function patchSettings(hookCommand, env, pkgRoot) {
 
   if (!stopAlreadyInstalled) {
     settings.hooks.Stop.push({
-      matcher: "",
       hooks: [
         {
           type: "command",
