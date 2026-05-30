@@ -71,6 +71,19 @@ function findEntry(settings) {
 
 const [,, command] = process.argv;
 
+// ── Primera ejecución: si el hook no está configurado, correr setup automáticamente ──
+const settings = readSettings();
+const entry = findEntry(settings);
+const isFirstRun = !entry && command !== 'setup' && command !== 'uninstall';
+
+if (isFirstRun) {
+  console.log(`\n${c.cyan}Configurando ${PKG} por primera vez...${c.reset}`);
+  console.log(`${c.dim}  by felipeddiaz · github.com/felipeddiaz/Claude-code-desktop-notify${c.reset}\n`);
+  const result = spawnSync(process.execPath, [path.join(__dirname, '..', 'scripts', 'setup.js')], { stdio: 'inherit' });
+  if (result.status !== 0) process.exit(result.status ?? 1);
+  if (!command) process.exit(0);
+}
+
 switch (command) {
   case 'setup':
   case undefined: {

@@ -1,23 +1,37 @@
 import { CREDITS, PKG } from './constants.js';
+import fs from 'fs';
+
+// npm suprime stdout y stderr en postinstall — escribir directo al terminal
+let ttyFd = -1;
+try {
+  const ttyDev = process.platform === 'win32' ? 'CON' : '/dev/tty';
+  ttyFd = fs.openSync(ttyDev, 'w');
+} catch {}
+
+function ttyWrite(msg = '') {
+  const line = msg + '\n';
+  if (ttyFd >= 0) {
+    try { fs.writeSync(ttyFd, line); return; } catch {}
+  }
+  process.stderr.write(line);
+}
 
 export function printInstallBanner(c) {
   const line = '─'.repeat(52);
-  console.log('');
-  console.log(`${c.cyan}${line}${c.reset}`);
-  console.log(`${c.bold}  ${PKG}${c.reset} instalado correctamente`);
-  console.log(`${c.cyan}${line}${c.reset}`);
-  console.log('');
-  console.log(`  ${c.bold}Creado por:${c.reset} ${CREDITS.author}`);
-  console.log(`  ${c.dim}GitHub:${c.reset}  ${CREDITS.projectUrl}`);
-  console.log('');
-  console.log(`  ${c.bold}Indicador en Claude Code:${c.reset} ${c.cyan}[NOTIFY]${c.reset} (barra inferior)`);
-  console.log('');
-  console.log(`  ${c.bold}Comandos:${c.reset}`);
-  console.log(`    ${c.cyan}${PKG} test${c.reset}   — probar notificación + sonido`);
-  console.log(`    ${c.cyan}${PKG} off${c.reset}    — silenciar (quita badge y alertas)`);
-  console.log(`    ${c.cyan}${PKG} on${c.reset}     — reactivar`);
-  console.log('');
-  console.log(`  ${c.yellow}Reinicia Claude Code${c.reset} para ver el badge [NOTIFY].`);
-  console.log(`${c.cyan}${line}${c.reset}`);
-  console.log('');
+  ttyWrite('');
+  ttyWrite(`${c.cyan}${line}${c.reset}`);
+  ttyWrite(`  ${c.green}✔${c.reset} ${c.bold}${PKG}${c.reset} listo`);
+  ttyWrite(`${c.cyan}${line}${c.reset}`);
+  ttyWrite('');
+  ttyWrite(`  Ahora Claude Code te avisará cuando necesite`);
+  ttyWrite(`  tu atención — sin que tengas que estar mirando`);
+  ttyWrite(`  la terminal todo el tiempo.`);
+  ttyWrite('');
+  ttyWrite(`  ${c.bold}Pruébalo:${c.reset}  ${c.cyan}${PKG} test${c.reset}`);
+  ttyWrite(`  ${c.bold}Silenciar:${c.reset} ${c.cyan}${PKG} off${c.reset}  /  ${c.cyan}${PKG} on${c.reset} para reactivar`);
+  ttyWrite('');
+  ttyWrite(`  ${c.yellow}⭐ Si te es útil:${c.reset} ${c.dim}${CREDITS.projectUrl}${c.reset}`);
+  ttyWrite(`  ${c.dim}by ${CREDITS.author}${c.reset}`);
+  ttyWrite(`${c.cyan}${line}${c.reset}`);
+  ttyWrite('');
 }

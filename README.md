@@ -27,11 +27,10 @@ Deja de mirar la terminal. Recibe una alerta cuando Claude necesita tu atención
 
 ```bash
 npm install -g claude-code-desktop-notify
-# o
-pnpm add -g claude-code-desktop-notify
+claude-code-desktop-notify
 ```
 
-El `postinstall` configura todo automáticamente: detecta tu OS, copia el script correcto y actualiza `~/.claude/settings.json`.
+La segunda línea configura todo automáticamente: detecta tu OS, copia el script correcto, actualiza `~/.claude/settings.json` y muestra el resumen.
 
 ---
 

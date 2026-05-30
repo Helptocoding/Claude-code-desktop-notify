@@ -27,11 +27,27 @@ const c = {
   bold:   '\x1b[1m',
   dim:    '\x1b[2m',
 };
-const ok    = (msg) => console.log(`${c.green}✔${c.reset} ${msg}`);
-const info  = (msg) => console.log(`${c.cyan}ℹ${c.reset} ${msg}`);
-const warn  = (msg) => console.log(`${c.yellow}⚠${c.reset} ${msg}`);
-const err   = (msg) => console.error(`${c.red}✖${c.reset} ${msg}`);
-const title = (msg) => console.log(`\n${c.bold}${msg}${c.reset}\n`);
+
+// npm suprime stdout y stderr en postinstall — escribir directo al terminal
+let ttyFd = -1;
+try {
+  const ttyDev = process.platform === 'win32' ? 'CON' : '/dev/tty';
+  ttyFd = fs.openSync(ttyDev, 'w');
+} catch {}
+
+function ttyWrite(msg = '') {
+  const line = msg + '\n';
+  if (ttyFd >= 0) {
+    try { fs.writeSync(ttyFd, line); return; } catch {}
+  }
+  process.stderr.write(line);
+}
+
+const ok    = (msg) => ttyWrite(`${c.green}✔${c.reset} ${msg}`);
+const info  = (msg) => ttyWrite(`${c.cyan}ℹ${c.reset} ${msg}`);
+const warn  = (msg) => ttyWrite(`${c.yellow}⚠${c.reset} ${msg}`);
+const err   = (msg) => ttyWrite(`${c.red}✖${c.reset} ${msg}`);
+const title = (msg) => ttyWrite(`\n${c.bold}${msg}${c.reset}\n`);
 
 // ─── Detectar entorno ────────────────────────────────────────────────────────
 function detectEnv() {
