@@ -11,32 +11,10 @@ import { fileURLToPath } from 'url';
 
 const PKG = 'claude-code-desktop-notify';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const ACTIVE_FLAG = path.join(HOME, '.claude', `.${PKG}-active`);
-
-function setActiveFlag(active) {
-  fs.mkdirSync(path.dirname(ACTIVE_FLAG), { recursive: true });
-  if (active) fs.writeFileSync(ACTIVE_FLAG, 'on\n', 'utf8');
-  else { try { fs.unlinkSync(ACTIVE_FLAG); } catch {} }
-}
-
-const c = {
-  reset:  '\x1b[0m',
-  green:  '\x1b[32m',
-  yellow: '\x1b[33m',
-  cyan:   '\x1b[36m',
-  red:    '\x1b[31m',
-  bold:   '\x1b[1m',
-  dim:    '\x1b[2m',
-};
-
-const ok   = (msg) => console.log(`${c.green}✔${c.reset} ${msg}`);
-const warn = (msg) => console.log(`${c.yellow}⚠${c.reset} ${msg}`);
-const fail = (msg) => console.log(`${c.red}✖${c.reset} ${msg}`);
-const info = (msg) => console.log(`${c.cyan}ℹ${c.reset} ${msg}`);
-
 const HOME          = os.homedir();
 const HOOKS_DIR     = path.join(HOME, '.claude', 'hooks');
 const SETTINGS_PATH = path.join(HOME, '.claude', 'settings.json');
+const ACTIVE_FLAG   = path.join(HOME, '.claude', `.${PKG}-active`);
 
 function isOurHook(command) {
   if (typeof command !== 'string') return false;
