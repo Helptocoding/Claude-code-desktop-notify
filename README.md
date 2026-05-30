@@ -25,12 +25,19 @@ Deja de mirar la terminal. Recibe una alerta cuando Claude necesita tu atención
 
 ## Instalación
 
-```bash
-npm install -g claude-code-desktop-notify
-claude-code-desktop-notify
+**Windows (PowerShell):**
+```powershell
+npm install -g claude-code-desktop-notify; claude-code-desktop-notify
 ```
 
-La segunda línea configura todo automáticamente: detecta tu OS, copia el script correcto, actualiza `~/.claude/settings.json` y muestra el resumen.
+**Windows (CMD) / macOS / Linux:**
+```bash
+npm install -g claude-code-desktop-notify && claude-code-desktop-notify
+```
+
+La segunda parte del comando configura todo automáticamente: detecta tu OS, copia el script correcto, actualiza `~/.claude/settings.json` y muestra el resumen.
+
+> **¿Por qué no es un solo comando?** `npm install -g` no ejecuta scripts de configuración de forma confiable en todos los entornos, por lo que el setup corre al llamar el comando por primera vez.
 
 ---
 
