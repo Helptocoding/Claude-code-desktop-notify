@@ -152,6 +152,8 @@ Tras cambiar el JSON, prueba con `claude-code-desktop-notify test`.
 
 `osascript` necesita permisos de notificación en **Preferencias del Sistema → Notificaciones → Script Editor**.
 
+El sonido se reproduce con `afplay` usando los sonidos del sistema en `/System/Library/Sounds/`. Si no escuchas nada, verifica que el volumen del sistema no esté en silencio y que Script Editor tenga permisos de notificación.
+
 ### WSL: no encuentra `powershell.exe`
 
 ```bash

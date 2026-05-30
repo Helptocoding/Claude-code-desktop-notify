@@ -74,8 +74,19 @@ if [[ "$(uname)" == "Darwin" ]]; then
     SAFE_SUBTITLE="${SUBTITLE//\"/\\\"}"
     SCRIPT="display notification \"$SAFE_MSG\" with title \"$SAFE_TITLE\""
     [ -n "$SUBTITLE" ] && SCRIPT="display notification \"$SAFE_MSG\" with title \"$SAFE_TITLE\" subtitle \"$SAFE_SUBTITLE\""
-    SCRIPT="$SCRIPT sound name \"$SOUND\""
     osascript -e "$SCRIPT" 2>/dev/null || true
+
+    # macOS ignora `sound name` en display notification — reproducir con afplay
+    SOUND_FILE="/System/Library/Sounds/${SOUND}.aiff"
+    if [ -f "$SOUND_FILE" ]; then
+        afplay "$SOUND_FILE" &
+    else
+        # Fallback: cualquier sonido del sistema disponible
+        for fallback in Ping Tink Glass Pop Purr Blow Bottle Frog Hero Morse Sosumi Submarine; do
+            f="/System/Library/Sounds/${fallback}.aiff"
+            if [ -f "$f" ]; then afplay "$f" & break; fi
+        done
+    fi
 else
     URGENCY="normal"
     [[ "$NOTIF_TYPE" == "permission_prompt" ]] && URGENCY="critical"
