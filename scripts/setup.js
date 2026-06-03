@@ -146,6 +146,19 @@ function patchSettings(hookCommand, env, pkgRoot) {
   settings.hooks ??= {};
   settings.hooks.Notification ??= [];
 
+  // ── Migrar entradas antiguas de PermissionRequest → Notification ──
+  if (Array.isArray(settings.hooks.PermissionRequest)) {
+    const oldEntries = settings.hooks.PermissionRequest.filter(entry =>
+      (entry.hooks ?? []).some(h => typeof h.command === 'string' && (h.command.includes(PKG) || h.command.includes('claude-notify')))
+    );
+    if (oldEntries.length > 0) {
+      settings.hooks.PermissionRequest = settings.hooks.PermissionRequest.filter(entry =>
+        !(entry.hooks ?? []).some(h => typeof h.command === 'string' && (h.command.includes(PKG) || h.command.includes('claude-notify')))
+      );
+      warn(`Hook migrado de PermissionRequest → Notification (fix de v1.2.x)`);
+    }
+  }
+
   // ── Comando de reset de título (hook Stop) ──
   let resetCommand;
   if (env === 'windows') {
@@ -194,7 +207,6 @@ function patchSettings(hookCommand, env, pkgRoot) {
 
   if (!alreadyInstalled) {
     settings.hooks.Notification.push({
-      matcher: "permission_prompt|idle_prompt",
       hooks: [
         {
           type: "command",
@@ -203,7 +215,7 @@ function patchSettings(hookCommand, env, pkgRoot) {
         }
       ]
     });
-    ok(`Hook de notificación agregado a settings.json`);
+    ok(`Hook Notification agregado a settings.json`);
   } else if (!updated) {
     ok(`${PKG} ya estaba en settings.json — sin cambios.`);
   }
@@ -216,7 +228,6 @@ function patchSettings(hookCommand, env, pkgRoot) {
 
   if (!stopAlreadyInstalled) {
     settings.hooks.Stop.push({
-      matcher: "",
       hooks: [
         {
           type: "command",

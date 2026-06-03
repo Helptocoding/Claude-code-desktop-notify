@@ -1,6 +1,6 @@
 {
   "name": "claude-code-desktop-notify",
-  "version": "1.1.0",
+  "version": "1.2.2",
   "description": "Desktop notifications for Claude Code — get alerted when permissions are needed or Claude is waiting",
   "type": "module",
   "bin": {

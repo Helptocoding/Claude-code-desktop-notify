@@ -4,15 +4,15 @@
 
 # claude-code-desktop-notify
 
-**Notificaciones de escritorio para Claude Code**
+**Desktop notifications for Claude Code**
 
-Deja de mirar la terminal. Recibe una alerta cuando Claude necesita tu atención.
+Stop watching the terminal. Get alerted when Claude needs your attention.
 
-> Herramienta no oficial — no afiliada ni respaldada por Anthropic.
+> Unofficial tool — not affiliated with or endorsed by Anthropic.
 
 ---
 
-[Instalación](#instalación) • [Comandos](#comandos) • [Compatibilidad](#compatibilidad) • [Cómo funciona](#cómo-funciona) • [Solución de problemas](#solución-de-problemas)
+[Installation](#installation) • [Commands](#commands) • [Compatibility](#compatibility) • [How it works](#how-it-works) • [Troubleshooting](#troubleshooting)
 
 ![version](https://img.shields.io/npm/v/claude-code-desktop-notify?label=version&color=0e7fc0)
 ![license](https://img.shields.io/npm/l/claude-code-desktop-notify?label=license&color=22863a)
@@ -23,82 +23,80 @@ Deja de mirar la terminal. Recibe una alerta cuando Claude necesita tu atención
 
 ---
 
-## Instalación
+## Installation
 
 ```bash
 npm install -g claude-code-desktop-notify
-# o
-pnpm add -g claude-code-desktop-notify
 ```
 
-El `postinstall` configura todo automáticamente: detecta tu OS, copia el script correcto y actualiza `~/.claude/settings.json`.
+The `postinstall` script automatically configures everything: detects your OS, copies the right script, and updates `~/.claude/settings.json`.
 
 ---
 
-## Comandos
+## Commands
 
 ```bash
-# Activar / desactivar (sin desinstalar)
+# Enable / disable (without uninstalling)
 claude-code-desktop-notify off
 claude-code-desktop-notify on
 
-# Ver estado de la instalación
+# Check installation status
 claude-code-desktop-notify status
 
-# Enviar notificación de prueba
+# Send test notification
 claude-code-desktop-notify test
 
-# Reinstalar / reparar configuración
+# Reinstall / repair configuration
 claude-code-desktop-notify setup
 
-# Desinstalar (limpia settings.json automáticamente)
+# Uninstall (automatically cleans settings.json)
 npm remove -g claude-code-desktop-notify
 ```
 
 ---
 
-## Eventos cubiertos
+## Covered events
 
-| Evento | Cuándo dispara |
+| Event | When it triggers |
 |--------|---------------|
-| `permission_prompt` | Claude necesita que autorices una acción (escribir archivo, ejecutar comando, etc.) |
-| `idle_prompt` | Claude lleva 60+ segundos esperando tu respuesta |
+| `permission_prompt` | Claude needs you to authorize an action (write file, run command, etc.) |
+| `idle_prompt` | Claude has been waiting 60+ seconds for your response |
 
 ---
 
-## Compatibilidad
+## Compatibility
 
-| OS | Método |
+| OS | Method |
 |----|--------|
-| **Windows** | PowerShell toast nativo (sin dependencias externas) |
-| **macOS** | `osascript` (nativo) |
+| **Windows** | Native PowerShell toast (no external dependencies) |
+| **macOS** | `osascript` (native) |
 | **Linux** | `notify-send` (libnotify) |
-| **WSL** | Llama a `powershell.exe` de Windows desde bash |
+| **WSL** | Calls Windows `powershell.exe` from bash |
 
 ---
 
-## Indicador en la terminal
+## Terminal indicator
 
-Al recibir una notificación, el **título de la ventana del terminal** cambia automáticamente:
+When a notification arrives, the **terminal window title** changes automatically:
 
-- `🔐 1 | Claude Code` — cuando Claude necesita autorización
-- `⏳ 1 | Claude Code` — cuando Claude está esperando tu respuesta
+- `🔐 1 | Claude Code` — when Claude needs authorization
+- `⏳ 1 | Claude Code` — when Claude is waiting for your response
 
-El número sube con cada evento pendiente y se resetea cuando Claude termina la tarea. Visible en la barra de tareas de Windows Terminal.
+The number increments with each pending event and resets when Claude finishes the task. Visible in the Windows Terminal taskbar.
 
-Además, aparece un badge **cyan** `[NOTIFY]` en la barra inferior de Claude Code.
+Additionally, a **cyan** `[NOTIFY]` badge appears in Claude Code's status bar.
 
-- Si ya tienes otra status line configurada, se **encadena** automáticamente sin reemplazarla.
-- `claude-code-desktop-notify off` oculta el badge y las alertas; `on` lo restaura.
-- Tras instalar o actualizar, **reinicia Claude Code** para ver el cambio.
+- If you already have another status line configured, it **chains** automatically without replacing it.
+- `claude-code-desktop-notify off` hides the badge and alerts; `on` restores them.
+- After installing or updating, **restart Claude Code** to see the change.
 
 ---
 
-## Cómo funciona
+## How it works
 
-Claude Code tiene un sistema de hooks nativo. Este paquete registra un hook `Notification` en `~/.claude/settings.json` que ejecuta un script local cada vez que Claude necesita atención.
+Claude Code has a native hook system. This package registers a `Notification` hook in `~/.claude/settings.json` that executes a local script whenever Claude needs attention.
 
-El hook recibe un JSON por stdin con el tipo de evento y el mensaje, y lo convierte en una notificación nativa del sistema operativo.
+The hook receives a JSON via stdin with the event type and message, and converts it into a native OS notification.
 
 ```json
 {
@@ -121,17 +119,17 @@ El hook recibe un JSON por stdin con el tipo de evento y el mensaje, y lo convie
 
 ---
 
-## Solución de problemas
+## Troubleshooting
 
-### Windows: las notificaciones no aparecen
+### Windows: notifications don't appear
 
-Verifica que las notificaciones estén habilitadas en **Configuración → Sistema → Notificaciones** y que **Claude Code Notifications** tenga permiso.
+Verify that notifications are enabled in **Settings → System → Notifications** and that **Claude Code Notifications** has permission.
 
-### Windows: personalizar el sonido
+### Windows: customize sound
 
-Por defecto usa sonidos suaves de `C:\Windows\Media` (nudge al pedir permiso, chimes al esperar respuesta).
+By default it uses soft sounds from `C:\Windows\Media` (nudge for permission requests, chimes for waiting).
 
-Crea `~/.claude/desktop-notify-sounds.json` con rutas completas o alias:
+Create `~/.claude/desktop-notify-sounds.json` with full paths or aliases:
 
 ```json
 {
@@ -142,47 +140,49 @@ Crea `~/.claude/desktop-notify-sounds.json` con rutas completas o alias:
 }
 ```
 
-**Alias disponibles:** `chimes`, `ding`, `notify`, `nudge`, `messaging`, `email`, `balloon`, `default`, `generic`, `exclamation`, `error`, `calendar`
+**Available aliases:** `chimes`, `ding`, `notify`, `nudge`, `messaging`, `email`, `balloon`, `default`, `generic`, `exclamation`, `error`, `calendar`
 
-También puedes poner el nombre de cualquier `.wav` de `C:\Windows\Media` o la ruta completa a tu propio archivo.
+You can also use any `.wav` filename from `C:\Windows\Media` or the full path to your own file.
 
-Tras cambiar el JSON, prueba con `claude-code-desktop-notify test`.
+After changing the JSON, test with `claude-code-desktop-notify test`.
 
-### macOS: sin sonido o sin notificación
+### macOS: no sound or notification
 
-`osascript` necesita permisos de notificación en **Preferencias del Sistema → Notificaciones → Script Editor**.
+`osascript` needs notification permissions in **System Preferences → Notifications → Script Editor**.
 
-### WSL: no encuentra `powershell.exe`
+Sound is played with `afplay` using system sounds from `/System/Library/Sounds/`. If you don't hear anything, verify that system volume isn't muted and that Script Editor has notification permissions.
+
+### WSL: can't find `powershell.exe`
 
 ```bash
 which powershell.exe
-# Debe retornar algo como /mnt/c/Windows/System32/...
+# Should return something like /mnt/c/Windows/System32/...
 ```
 
-Si usas Git Bash o MSYS2, agrega PowerShell al PATH:
+If using Git Bash or MSYS2, add PowerShell to PATH:
 
 ```bash
 export PATH="/c/Windows/System32/WindowsPowerShell/v1.0:$PATH"
 ```
 
-### Verificar que el hook funciona
+### Verify the hook works
 
 ```bash
 # macOS / Linux
-echo '{"notification_type":"permission_prompt","message":"Prueba manual","cwd":"/mi/proyecto"}' | ~/.claude/hooks/claude-code-desktop-notify.sh
+echo '{"notification_type":"permission_prompt","message":"Manual test","cwd":"/my/project"}' | ~/.claude/hooks/claude-code-desktop-notify.sh
 
 # Windows
-echo '{"notification_type":"permission_prompt","message":"Prueba manual","cwd":"C:\\proyecto"}' | powershell -File %USERPROFILE%\.claude\hooks\claude-code-desktop-notify.ps1
+echo '{"notification_type":"permission_prompt","message":"Manual test","cwd":"C:\\project"}' | powershell -File %USERPROFILE%\.claude\hooks\claude-code-desktop-notify.ps1
 ```
 
 ---
 
-## Limitación conocida
+## Known limitation
 
-El evento `AskUserQuestion` actualmente **no dispara** el hook `Notification` — es una limitación de Claude Code con un [feature request abierto](https://github.com/anthropics/claude-code/issues/13830). Los hooks de `permission_prompt` e `idle_prompt` cubren los casos más comunes.
+The `AskUserQuestion` event currently **does not trigger** the `Notification` hook — it's a Claude Code limitation with an [open feature request](https://github.com/anthropics/claude-code/issues/13830). The `permission_prompt` and `idle_prompt` hooks cover the most common cases.
 
 ---
 
-## Licencia
+## License
 
 MIT
